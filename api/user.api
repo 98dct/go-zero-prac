@@ -1,0 +1,35 @@
+syntax = "v1"
+
+info (
+	title:   "用户服务"
+	desc:    "用户服务测试"
+	author:  "dct"
+	email:   "1447837683@qq.com"
+	version: "v1"
+)
+
+//goctl api go -api user.api -dir . -style gozero
+type GetUserReq {
+	Id string `json:"id"`
+}
+
+type GetUserResp {
+	Id    string `json:"id"`
+	Name  string `json:"name"`
+	Phone string `json:"phone"`
+}
+
+//定义user api服务的描述
+service User {
+	@handler GetUser
+	get /users (GetUserReq) returns (GetUserResp)
+}
+
+@server (
+	middleware: LoginVerification
+)
+service User {
+	@handler GetUserInfo
+	get /userInfo (GetUserReq) returns (GetUserResp)
+}
+
