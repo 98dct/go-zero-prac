@@ -1,0 +1,27 @@
+# 第一阶段：构建应用程序
+FROM golang:1.19 AS builder
+
+# 设置工作目录
+WORKDIR /source
+
+ENV GOPROXY=https://goproxy.cn,direct
+
+# 复制源码并构建应用程序
+COPY . .
+RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/user-rpc rpc/user.go
+
+
+# 第二阶段：创建最终镜像
+FROM alpine:3.18.4
+
+RUN mkdir /user
+# 复制构建阶段的应用程序到最终镜像
+COPY --from=builder /source /user
+
+RUN chmod +x /user/bin/user-rpc
+WORKDIR /user
+
+ENTRYPOINT ["bin/user-rpc", "-f", "rpc/etc/user.yaml"]
+
+
+#docker run --name user-rpc -p 8080:8080 --net user --ip 168.10.0.70 --link etcd -d user-rpc
